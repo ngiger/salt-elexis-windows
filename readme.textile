@@ -30,6 +30,8 @@ h4. Salt-Minion auf Windows installieren
 Auf dem Windows Rechner, die Datei https://repo.saltstack.com/windows/Salt-Minion-2015.8.8-2-AMD64-Setup.exe (für 64-Bit), respektive
 https://repo.saltstack.com/windows/Salt-Minion-2015.8.8-2-x86-Setup.exe (für 32-bit) herunterladen.
 
+Testen ob der Salt-Master erreicht werden kann. Dazu in der Kommandozeile @ping -n 1 192.168.3.222@ eingeben.
+
 Mit Hilfe des Kommandozeilen-Aufrufs @Salt-Minion-2015.8.8-2-AMD64-Setup.exe /S /master=192.168.3.222 /minion-name=praxis.labor /start-service=1@
 den Salt-minion (Client) installieren und den Service starten. Ein Fenster zum Erlauben der Installation wird kommen.
 
