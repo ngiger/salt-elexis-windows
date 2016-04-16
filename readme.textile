@@ -1,0 +1,65 @@
+h1. Eine Praxis-IT mit Salt zur einfachen Installation von Elexis unter Windows
+
+Salt ist für Niklaus Giger nach Jahren mit viel zu langsamen Fortschritten mit Puppet eine
+hochwillkommene Alternative und scheint mir viel schneller, einfacher zu programmieren und zu testen sein.
+
+Siehe auch https://docs.saltstack.com/en/latest/
+
+h2. Test-Installation mit Hilfe von Vagrant
+
+Vagrant für das gewünschte Betriebssystem von https://www.vagrantup.com/downloads.html herunterladen.
+
+h3. Salt master als virtuelle Machine installieren und aufstarten
+
+Verifizieren, dass das Subnet 192.186.3 nicht verwendet wird. Ansonsten sind allen Dateien hier 192.186.3 durch eine geeignete Sub-Netz-Adresse
+zu ersetzen.
+
+Das Vagrantfile in diesem Ordner definiert einen Linux-Master, der als Salt-Master ein Rezept zur Installation von Elexis 3.1.0 prerelease auf
+Windows Rechnern enthält.
+
+Mit dem Aufruf @vagrant up master@ wird er gestartet. Da hier ca. 1 GB heruntergeladen werden und danach noch die letzten Sicherheitsupdate,
+etc appliziert werden, geht dies auch eine Weile (ca. 2 Minuten bei mir).
+
+Mit @vagrant ssh master@ kann man via SSH eine Kommandozeile auf dem salt-master erstellen
+
+h3. Existierende Windows-Maschine zum Testen benutzen
+
+
+h4. Salt-Minion auf Windows installieren
+
+Auf dem Windows Rechner, die Datei https://repo.saltstack.com/windows/Salt-Minion-2015.8.8-2-AMD64-Setup.exe (für 64-Bit), respektive
+https://repo.saltstack.com/windows/Salt-Minion-2015.8.8-2-x86-Setup.exe (für 32-bit) herunterladen.
+
+Mit Hilfe des Kommandozeilen-Aufrufs @Salt-Minion-2015.8.8-2-AMD64-Setup.exe /S /master=192.168.3.222 /minion-name=praxis.labor /start-service=1@
+den Salt-minion (Client) installieren und den Service starten. Ein Fenster zum Erlauben der Installation wird kommen.
+
+Das Ganze kann mit dem Erstellen einer Kommando-Datei (siehe
+bc. REM Es wird angenommen, dass die Datei
+REM https://repo.saltstack.com/windows/Salt-Minion-2015.8.8-2-AMD64-Setup.exe
+RM von Hand in das gleiche Verzeichnis heruntergeladen wurde
+Salt-Minion-2015.8.8-2-AMD64-Setup.exe /S /master=192.168.3.222 /minion-name=praxis.labor /start-service=1
+
+h4. Auf der Windows-Maschine von Master aus Elexis-Installieren.
+
+Mit @vagrant ssh master@ eine Kommandozeile auf dem master eröffnen.
+Dort den Befehl @sudo salt-key -L@ ausführen. In der Ausgabe sollte man nun den hostnamen des Windows-client sehen. Z.B.
+
+bc. Accepted Keys:
+Denied Keys:
+Unaccepted Keys:
+praxis.labor # <<<<<
+Rejected Keys:
+
+Nun diesen Schlüssel mit Hilfe von @sudo salt-key -A@  akzeptieren. Und bei der Frage @Proceed? [n/Y] @ mit y antworten.
+
+Mit dem Aufruf von @sudo salt '*' state.highstate@ wird nun Elexis im Verzeichnis C:\elexis-3.1-prerelease installiert.
+Dies kann eine Weile dauern, da sie heruntergeladen werden muss.
+
+Die ausgeführte Anweisung enstammen der Datei saltstack/salt/install_elexis_opensource_under_windows.sls
+
+h2. Bemerkungen
+
+Falls man Elexis auf mehreren Windows Client instalieren will, installiert man zuerst den Salt-Minion auf allen Windows PC.
+
+Beim Ausführen des Befehls @sudo salt '*' state.highstate@ wird dann Elexis automatisch auf allen Windows-Client (deren
+Schlüssel man auf dem master akzeptiert hat) installiert.
